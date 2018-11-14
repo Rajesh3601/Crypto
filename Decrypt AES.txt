@@ -1,0 +1,72 @@
+package com.crypto.crypto;
+
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Base64;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
+import java.security.MessageDigest;
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.lang.String;
+
+
+public class decrypt extends AppCompatActivity {
+       // These are the global variables
+    EditText editData, code;
+    TextView result;
+    Button buttonSubmit;
+    String outputstring;
+    String AES = "AES";
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.decrypt);
+
+        editData  = (EditText) findViewById(R.id.editText3);
+        code  = (EditText) findViewById(R.id.editText4);
+        result = (TextView) findViewById(R.id.decryptedData);
+        buttonSubmit = (Button) findViewById(R.id.button4);
+
+        /*
+            Encrypt Button
+        */
+        buttonSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try{
+                    outputstring = decryptData(editData.getText().toString(), code.getText().toString());
+                    result.setText(outputstring);
+                } catch( Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+        
+        
+        
+    }
+
+
+
+    private String decryptData (String editData, String code) throws Exception {
+        SecretKeySpec key  = generateKey(code);
+        Cipher c = Cipher.getInstance(AES);
+        c.init(Cipher.DECRYPT_MODE,key);
+        byte[] decodedValue = Base64.decode(editData, Base64.DEFAULT);
+        byte[] decValue = c.doFinal(decodedValue);
+        String decryptedData  = new String(decValue);
+        return decryptedData;
+    }
+    private SecretKeySpec generateKey ( String code) throws Exception{
+        final MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] bytes = code.getBytes("UTF-8");
+        digest.update(bytes,0,bytes.length);
+        byte[] key = digest.digest();
+        SecretKeySpec SecretKeySpec = new SecretKeySpec(key, "AES");
+        return SecretKeySpec;
+    }
+ }
